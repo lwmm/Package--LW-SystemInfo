@@ -1,0 +1,33 @@
+Systemconfig um folgenden Eintrag erweitert:
+
+[systeminfo]
+active                  =   1
+allowed_ip              =   "127.0.0.1"
+
+
+
+(c_server/c_builder/) build_autoloadregistry.class.php :
+
+"loader"-Funktion eingefügt, um behelfsmäßig ein Package zu laden :
+
+if (substr($className, 0, 2) == "Lw") {
+    $className = str_replace("\\", "/", $className);
+    $className = str_replace("Lw/", "", $className);
+
+    $file = $this->config['path']['package'].$className.'.php';
+    if ($file) {
+        require $file;
+    }
+    return;
+}
+
+
+
+(c_server/c_frontend/showpage) agent_showpage.class.php:
+
+im __construct eingefügt :
+
+if ($this->request->getInt('getSystemInfo') == 1) {
+    $systemInfo = new \LwSystemInfo\Controller\Frontend();
+    $systemInfo->execute();
+}
