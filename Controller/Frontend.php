@@ -25,25 +25,65 @@ class Frontend
 {
 
     protected $config;
+    protected $request;
 
     public function __construct()
     {
         $this->config = \lw_registry::getInstance()->getEntry("config");
+        $this->request = \lw_registry::getInstance()->getEntry("request");
     }
 
     public function execute()
     {
         if ($this->config["systeminfo"]["active"] == 1 && $this->config["systeminfo"]["allowed_ip"] == $_SERVER["REMOTE_ADDR"]) {
-            $array = array();
-            
-            $packageCollector = new \LwSystemInfo\Model\PackageCollector();
-            $pluginCollector = new \LwSystemInfo\Model\PluginCollector();
-            
-            $array["packages"] = $packageCollector->execute();
-            $array["plugins"] = $pluginCollector->execute();
-            
-            die(json_encode($array));
+            if ($this->request->getAlnum("cmd")) {
+                $cmd = $this->request->getAlnum("cmd");
+            } else {
+                $cmd = "getModules";
+            }
+            $method = $cmd . "Action";
+            if (method_exists($this, $method)) {
+                return $this->$method();
+            } else {
+                die("command " . $method . " doesn't exist");
+            }
         }
+    }
+
+    protected function getModulesAction()
+    {
+        $array = array();
+
+        $packageCollector = new \LwSystemInfo\Model\PackageCollector();
+        $pluginCollector = new \LwSystemInfo\Model\PluginCollector();
+
+        $array["packages"] = $packageCollector->execute();
+        $array["plugins"] = $pluginCollector->execute();
+
+        die(json_encode($array));
+    }
+
+    protected function getStatsAction()
+    {
+        $statsCollector = new \LwSystemInfo\Model\StatsCollector();
+        $array = $statsCollector->execute();
+        
+        die(json_encode($array));
+    }
+    
+    protected function getMd5Action()
+    {
+        $array = array();
+        
+        $array["expectedMd5"] = $this->request->getAlnum("expectedMd5");
+        $array["configPath"] = $this->request->getAlnum("configPath");
+        $array["path"] = urldecode($this->request->getRaw("filePath"));
+        $array["completePath"] = $this->config["path"][$array["configPath"]] . $array["path"];
+
+        $md5 = new \LwSystemInfo\Model\getMd5();
+        $array["recievedMd5"] = $md5->execute($array["completePath"]);
+        
+        die(json_encode($array));
     }
 
 }
