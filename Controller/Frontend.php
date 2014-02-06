@@ -38,52 +38,16 @@ class Frontend
         if ($this->config["systeminfo"]["active"] == 1 && $this->config["systeminfo"]["allowed_ip"] == $_SERVER["REMOTE_ADDR"]) {
             if ($this->request->getAlnum("cmd")) {
                 $cmd = $this->request->getAlnum("cmd");
-            } else {
-                $cmd = "getModules";
             }
-            $method = $cmd . "Action";
-            if (method_exists($this, $method)) {
-                return $this->$method();
+
+            $class = "\\LwSystemInfo\\Module\\" . ucfirst($cmd);
+            if (class_exists($class, true)) {
+                $ModuleClass = new $class($this->request->getGetArray());
+                die(json_encode($ModuleClass->execute()));
             } else {
-                die("command " . $method . " doesn't exist");
+                die("ERROR: Class ' " . $class . "' not found !  --- Package:LwSystemInfo");
             }
         }
-    }
-
-    protected function getModulesAction()
-    {
-        $array = array();
-
-        $packageCollector = new \LwSystemInfo\Model\PackageCollector();
-        $pluginCollector = new \LwSystemInfo\Model\PluginCollector();
-
-        $array["packages"] = $packageCollector->execute();
-        $array["plugins"] = $pluginCollector->execute();
-
-        die(json_encode($array));
-    }
-
-    protected function getStatsAction()
-    {
-        $statsCollector = new \LwSystemInfo\Model\StatsCollector();
-        $array = $statsCollector->execute();
-        
-        die(json_encode($array));
-    }
-    
-    protected function getMd5Action()
-    {
-        $array = array();
-        
-        $array["expectedMd5"] = $this->request->getAlnum("expectedMd5");
-        $array["configPath"] = $this->request->getAlnum("configPath");
-        $array["path"] = urldecode($this->request->getRaw("filePath"));
-        $array["completePath"] = $this->config["path"][$array["configPath"]] . $array["path"];
-
-        $md5 = new \LwSystemInfo\Model\getMd5();
-        $array["recievedMd5"] = $md5->execute($array["completePath"]);
-        
-        die(json_encode($array));
     }
 
 }

@@ -6,6 +6,22 @@ allowed_ip              =   "127.0.0.1"
 
 
 
+Kurzbeschreibung Schnittstelle:
+
+- Der Modulename wird als GET Paramenter ( cmd ) uebergeben
+- Anhand des cmd wird die entsprechende Klasse geladen
+- Im Verzeichnis Module muss eine Klasse mit dem Namen ( cmd ) erstellt werden
+- Im Konstruktur wird das GET-Array übergeben
+- Nach dem Instanzieren des Modules wird die Funktion execute ausgefuehrt
+- Die Informationen, die an das Infosystem uebergeben werden sollen, werden in einem Array zurueckgegeben
+- Der Controller gibt das Array als Json-Array mit einem die aus
+
+
+
+
+
+
+
 (c_server/c_builder/) build_autoloadregistry.class.php :
 
 "loader"-Funktion eingefügt, um behelfsmäßig ein Package zu laden :

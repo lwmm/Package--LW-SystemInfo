@@ -1,27 +1,49 @@
 <?php
 
-namespace LwSystemInfo\Model;
+namespace LwSystemInfo\Module;
 
-class getMd5
+class Md5
 {
+    protected $GET;
+    protected $config;
 
-    public function execute($path, $charset = false)
+
+    public function __construct($GET)
     {
-        if (!$charset) {
+        $this->GET = $GET;
+        $this->config = \lw_registry::getInstance()->getEntry("config");
+    }
+
+    public function execute()
+    {
+        $array = array();        
+        $array["expectedMd5"] = $this->GET["expectedMd5"];
+        $array["configPath"] = $this->GET["configPath"];
+        $array["path"] = urldecode($this->GET["filePath"]);
+        $array["completePath"] = $this->config["path"][$array["configPath"]] . $array["path"];
+      
+        if (!isset($this->GET["charset"])) {
             $charset = "UTF-8";
+        }else{
+            $charset = $this->GET["charset"];
         }
 
+        $path = $array["completePath"];
         $path = str_replace("//", "", $path);
         $path = str_replace("..", "", $path);
+        
         if (is_file($path)) {
             $file = fopen($path, "r");
             while (!feof($file)) {
                 $content .= fgets($file);
             }
             fclose($file);
-            return md5($this->convert($charset, $content));
+            $array["recievedMd5"] = md5($this->convert($charset, $content));
+        }else{
+            $array["recievedMd5"] = false;
         }
-        return false;
+        
+        return $array;
     }
 
     private function convert($targetCharset, $content)
