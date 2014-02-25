@@ -29,22 +29,22 @@ class Listtool
 
     protected function getFileEntriesCount()
     {
-        $this->db->setStatement("SELECT COUNT(*) FROM t:lw_master WHERE lw_object = :lw_object AND opt1bool != 1 ");
+        $this->db->setStatement("SELECT COUNT(*) as amount FROM t:lw_master WHERE lw_object = :lw_object AND opt1bool != 1 ");
         $this->db->bindParameter("lw_object", "s", "lw_listtool2");
 
         $result = $this->db->pselect1();
 
-        return $result["COUNT(*)"];
+        return $result["amount"];
     }
 
     protected function getLinkEntriesCount()
     {
-        $this->db->setStatement("SELECT COUNT(*) FROM t:lw_master WHERE lw_object = :lw_object AND opt1bool = 1 ");
+        $this->db->setStatement("SELECT COUNT(*) as amount FROM t:lw_master WHERE lw_object = :lw_object AND opt1bool = 1 ");
         $this->db->bindParameter("lw_object", "s", "lw_listtool2");
 
         $result = $this->db->pselect1();
 
-        return $result["COUNT(*)"];
+        return $result["amount"];
     }
 
     protected function getSavedFilesCount()
