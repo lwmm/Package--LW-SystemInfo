@@ -50,7 +50,7 @@ class Listtool
     
     protected function getFileEntriesWithFileCount()
     {
-        $this->db->setStatement("SELECT COUNT(*) as amount FROM t:lw_master WHERE lw_object = :lw_object AND opt1bool != 1 AND ( opt1file != '' OR opt1file IS NOT NULL ) ");
+        $this->db->setStatement("SELECT COUNT(*) as amount FROM t:lw_master WHERE lw_object = :lw_object AND opt1bool != 1 AND ( opt2file != '' OR opt2file IS NOT NULL ) ");
         $this->db->bindParameter("lw_object", "s", "lw_listtool2");
 
         $result = $this->db->pselect1();
