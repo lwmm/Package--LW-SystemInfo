@@ -2,7 +2,7 @@
 
 namespace LwSystemInfo\Module;
 
-class Md5
+class GetFileContent
 {
 
     protected $GET;
@@ -16,44 +16,40 @@ class Md5
 
     public function execute()
     {
-        $systemRootDir = str_replace("lw_resource/", "", $this->config["path"]["resource"]);
+        if (isset($_SERVER["HTTPS"]) && ($_SERVER["HTTPS"] == "on" || $_SERVER["HTTPS"] == 1)) {
 
-        $array = array();
-        $array["expectedMd5"] = $this->GET["expectedMd5"];
-        $array["path"] = urldecode($this->GET["filePath"]);
-        $array["configPath"] = $this->GET["configPath"];
+            $systemRootDir = str_replace("lw_resource/", "", $this->config["path"]["resource"]);
 
-        if (strstr($array["configPath"], "plugin_path:")) {
-            $pluginModule = str_replace("plugin_path:", "", $array["configPath"]);
-            $array["completePath"] = $this->config["plugin_path"][$pluginModule] . $array["path"];
-        } else {
-            $array["completePath"] = $this->config["path"][$array["configPath"]] . $array["path"];
-        }
+            $array = array();
+            $array["filePath"] = urldecode($this->GET["filePath"]);
 
 
-        if (!isset($this->GET["charset"])) {
-            $charset = "UTF-8";
-        } else {
-            $charset = $this->GET["charset"];
-        }
-
-        $path = $array["completePath"];
-        $path = str_replace("..", "", $path);
-        $path = $array["completePath"] = str_replace("//", "", $path);
-
-        if (substr($path, 0, strlen($systemRootDir)) == $systemRootDir) {
-            if (is_file($path)) {
-                $file = fopen($path, "r");
-                while (!feof($file)) {
-                    $content .= fgets($file);
-                }
-                fclose($file);
-                $array["recievedMd5"] = md5($this->convert($charset, $content));
+            if (!isset($this->GET["charset"])) {
+                $charset = "UTF-8";
             } else {
-                $array["recievedMd5"] = false;
+                $charset = $this->GET["charset"];
             }
+
+            $path = $array["filePath"];
+            $path = str_replace("..", "", $path);
+            $path = $array["filePath"] = str_replace("//", "", $path);
+
+            if (substr($path, 0, strlen($systemRootDir)) == $systemRootDir) {
+                if (is_file($path)) {
+                    $file = fopen($path, "r");
+                    while (!feof($file)) {
+                        $content .= fgets($file);
+                    }
+                    fclose($file);
+                    $array["content"] = $this->convert($charset, $content);
+                } else {
+                    $array["content"] = false;
+                }
+            }
+            return $array;
+        } else {
+            return array("filePath" => " --- ", "content" => " --- ");
         }
-        return $array;
     }
 
     private function convert($targetCharset, $content)
